@@ -32,7 +32,10 @@ def main():
     """ This script adds nodes to the mongodb enc """
 
     parser = SafeConfigParser()
-    config = os.path.join(os.path.dirname(__file__),"../conf/conf.ini")
+    if os.path.isfile('/etc/mongodb-enc/conf.ini'):
+        config = '/etc/mongodb-enc/conf.ini'
+    else:
+        config = os.path.join(os.path.dirname(__file__),"../conf/conf.ini")
     parser.read(config)
     database = parser.get('mongodb_info', 'mongodb_db_name')
     collection = parser.get('mongodb_info', 'mongodb_collection_name')
