@@ -1,4 +1,4 @@
-Name:           mongo-enc
+Name:           mongodb-enc
 Version:        0.1
 Release:        1%{dist}
 Summary:        MongoDB driven External Node Classifier (ENC)
@@ -24,15 +24,15 @@ classifier for puppet.
 %install
 rm -rf %{buildroot}
 
-%{__mkdir_p} %{buildroot}%{_bindir}/mongo-enc
-%{__mkdir_p} %{buildroot}%{_sysconfdir}/mongo-enc
-%{__mkdir_p} %{buildroot}%{_localstatedir}/log/mongo-enc
-cp -r ./scripts/* %{buildroot}%{_bindir}/mongo-enc/
-cp -r ./conf/* %{buildroot}%{_sysconfidir}/mongo-enc/
+%{__mkdir_p} %{buildroot}%{_bindir}/mongodb-enc
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/mongodb-enc
+%{__mkdir_p} %{buildroot}%{_localstatedir}/log/mongodb-enc
+cp -r ./scripts/* %{buildroot}%{_bindir}/mongodb-enc/
+cp -r ./conf/* %{buildroot}%{_sysconfidir}/mongodb-enc/
 
 %files
-%{_bindir}/mongo-enc/*
-%{_sysconfdir}/mongo-enc/*
+%{_bindir}/mongodb-enc/*
+%{_sysconfdir}/mongodb-enc/*
 
 %pre
 
@@ -43,4 +43,4 @@ rm -rf %{buildroot}
 
 %changelog
 * Thu Dec 6 2012 David Wahlstrom <dwahlstrom@classmates.com> - 0.1-1
-- initial packaging of mongo-enc
+- initial packaging of mongodb-enc
