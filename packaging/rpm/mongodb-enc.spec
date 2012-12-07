@@ -28,7 +28,7 @@ rm -rf %{buildroot}
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/mongodb-enc
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/mongodb-enc
 cp -r ./scripts/* %{buildroot}%{_bindir}/mongodb-enc/
-cp -r ./conf/* %{buildroot}%{_sysconfidir}/mongodb-enc/
+cp -r ./conf/* %{buildroot}%{_sysconfdir}/mongodb-enc/
 
 %files
 %{_bindir}/mongodb-enc/*
@@ -44,3 +44,4 @@ rm -rf %{buildroot}
 %changelog
 * Thu Dec 6 2012 David Wahlstrom <dwahlstrom@classmates.com> - 0.1-1
 - initial packaging of mongodb-enc
+
