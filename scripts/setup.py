@@ -53,7 +53,10 @@ def main():
             paramkey = ''
             for pkey in param.split(','):
                 paramkey = pkey.split('=')[0]
-                paramvalue.append(pkey.split('=')[1])
+                if "=" in pkey:
+                    paramvalue.append(pkey.split('=')[1])
+                else:
+                    paramvalue = ''
                 paramkeyvalue[paramkey] = paramvalue
         paramclass[args.puppet_class] = paramkeyvalue
 
