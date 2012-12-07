@@ -35,8 +35,9 @@ def main():
     cmd_parser = argparse.ArgumentParser(description='Add Nodes To Mongodb ENC')
     cmd_parser.add_argument('-a', '--action', dest='puppet_action', choices=['append', 'new'], help='Append Or Recreate Default Node', required=True)
     cmd_parser.add_argument('-n', '--node', dest='puppet_node', help='Puppet Node Hostname', required=True)
-    cmd_parser.add_argument('-c', '--class', dest='puppet_classes', help='Can specify multiple classes each with -c', action='append')
-    cmd_parser.add_argument('-p', '--param', dest='puppet_param', help='Can specify multiple parameters each with -p', action='append')
+    cmd_parser.add_argument('-c', '--class', dest='puppet_class', help='Specify a class to add to a node', action='store')
+    cmd_parser.add_argument('-m', '--classparameters', dest='class_params', help='Can specify multiple class paramters each with -m. Requires a class to be specified', action='append')
+    cmd_parser.add_argument('-p', '--param', dest='puppet_param', help='Can specify multiple parameters (global variables) each with -p', action='append')
     cmd_parser.add_argument('-i', '--inherit', dest='puppet_inherit', help='Define a node to inherit classes from', action='store')
     cmd_parser.add_argument('-e', '--environment', dest='environment', help='Optional, defaults to "production"', default='production')
     args = cmd_parser.parse_args()
@@ -45,10 +46,10 @@ def main():
         print "ERROR: Node name and inherit name can not be the same"
         sys.exit(1)
 
-    if args.puppet_classes:
+    if args.puppet_class:
 
         c = {}
-        for pclass in args.puppet_classes:
+        for pclass in args.puppet_class:
             c[pclass] = ''
 
     if args.puppet_param:
@@ -71,9 +72,21 @@ def main():
                 print args.puppet_node+" Exists In Mongodb. Please Remove Node"
 
 
-        if args.puppet_classes:
-            d = { 'node' : args.puppet_node, 'enc' : { 'classes': c, 'environment' : args.environment }}
-
+        if args.puppet_class:
+            paramclass = {}
+            if not args.class_params:
+                paramkeyvalue = ''
+            else:
+                paramkeyvalue = {}
+                for param in args.class_params:
+                    paramvalue = []
+                    paramkey = ''
+                    for pkey in param.split(','):
+                        paramkey = pkey.split('=')[0]
+                        paramvalue.append(pkey.split('=')[1])
+                        paramkeyvalue[paramkey] = paramvalue
+            paramclass[args.puppet_class] = paramkeyvalue
+            d = { 'node' : args.puppet_node, 'enc' : { 'classes': paramclass, 'environment' : args.environment }}
         else:
             d = { 'node' : args.puppet_node, 'enc' : { 'environment' : args.environment }}
 
@@ -82,7 +95,6 @@ def main():
 
         if args.puppet_inherit:
             d['inherit'] = args.puppet_inherit
-		
 
         col.ensure_index('node', unique=True)
         col.insert(d)
@@ -94,7 +106,7 @@ def main():
             print "ERROR: Not Node In Mongo ENC. Please Use -a new"
             sys.exit(1)
 
-        if args.puppet_classes:
+        if args.puppet_class:
 		
             if 'classes' in node['enc']:
                 node['enc']['classes'].update(c)

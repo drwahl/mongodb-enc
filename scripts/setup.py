@@ -36,29 +36,40 @@ def main():
 
     cmd_parser = argparse.ArgumentParser(description='Add Default Node To Mongodb ENC')
     cmd_parser.add_argument('-a', '--action', dest='puppet_action', choices=['append', 'new'], help='Append Or Recreate Default Node', required=True)
-    cmd_parser.add_argument('-c', '--class', dest='puppet_classes', help='Can specify multiple classes each with -c', action='append', required=True)
+    cmd_parser.add_argument('-c', '--class', dest='puppet_class', help='Specify a puppet class', action='store', required=True)
+    cmd_parser.add_argument('-m', '--classparameters', dest='class_params', help='Specify multiple parameters for a class with each -m', action='append', required=False)
     args = cmd_parser.parse_args()
 
-
-    c = {}
+    paramclass = {}
+    paramclass[args.puppet_class] = ''
     col.ensure_index('node', unique=True)
 
-    for pclass in args.puppet_classes:
-        c[pclass] = ''
+    if not args.class_params:
+        paramkeyvalue = ''
+    else:
+        paramkeyvalue = {}
+        for param in args.class_params:
+            paramvalue = []
+            paramkey = ''
+            for pkey in param.split(','):
+                paramkey = pkey.split('=')[0]
+                paramvalue.append(pkey.split('=')[1])
+                paramkeyvalue[paramkey] = paramvalue
+        paramclass[args.puppet_class] = paramkeyvalue
 
     if args.puppet_action == 'append':
-        d = { 'node' : 'default', 'enc' : { 'classes': c }}
+        d = { 'node' : 'default', 'enc' : { 'classes': paramclass }}
         check = col.find_one({ 'node' : 'default' }, {'node': 1})
         if not check:
             print "Default Node Doesn't Exist, Please Add It First"
             sys.exit(1)
         ec = col.find_one({ 'node' : 'default'})
-        ec['enc']['classes'].update(c)
+        ec['enc']['classes'].update(paramclass)
         col.remove({ 'node' : 'default'})
         col.insert(ec)
 
     if args.puppet_action == 'new':
-        d = { 'node' : 'default', 'enc' : { 'classes': c }}
+        d = { 'node' : 'default', 'enc' : { 'classes': paramclass }}
         check = col.find_one({ 'node' : 'default' }, {'node': 1})
         if check:
             col.remove({ 'node' : 'default'})
