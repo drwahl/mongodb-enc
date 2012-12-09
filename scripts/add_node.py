@@ -62,9 +62,6 @@ def main():
             sys.exit(1)
 
     if args.puppet_action == 'new':
-        if not args.puppet_inherit:
-          print "ERROR: You Need To Define PUPPET_INHERIT"
-          sys.exit(1)
         check = col.find({ 'node' : args.puppet_node }, {'node': 1})
         for document in check:
             node = document['node']
@@ -95,6 +92,8 @@ def main():
 
         if args.puppet_inherit:
             d['inherit'] = args.puppet_inherit
+        else:
+            d['inherit'] = 'none'
 
         col.ensure_index('node', unique=True)
         col.insert(d)
@@ -124,9 +123,8 @@ def main():
             p = node['enc']['parameters']
             col.update({ 'node' : args.puppet_node}, { '$set': {'enc.parameters' : p}})
 
-        if args.puppet_inherit:
-            node['enc']['inherit'] = args.puppet_inherit
-            col.update({ 'node' : args.puppet_node}, { '$set' : {'inherit' : args.puppet_inherit}})
+        node['enc']['inherit'] = args.puppet_inherit
+        col.update({ 'node' : args.puppet_node}, { '$set' : {'inherit' : args.puppet_inherit}})
 				
 
 if __name__ == "__main__":

@@ -78,5 +78,9 @@ def main():
             col.remove({ 'node' : 'default'})
         col.insert(d)
 
+    #empty node so that inheritance can be effectively disabled
+    empty = { 'node' : 'none', 'enc' : ''}
+    col.insert(empty)
+
 if __name__ == "__main__":
     main()
