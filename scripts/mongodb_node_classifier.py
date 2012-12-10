@@ -63,9 +63,11 @@ def main():
                 iclass = idict['enc']['classes']
                 # apply inheritance node classes to the requested node
                 if 'classes' in n['enc']:
-                    #d['enc']['classes'].update(iclass)
+                    # grab the requested node's classes
                     tmp_class_store = d['enc']['classes']
+                    # apply the inheritance node classes
                     d['enc']['classes'] = iclass
+                    # apply the requested node's classes and overrides
                     d['enc']['classes'].update(tmp_class_store)
                 else:
                     d['enc']['classes'] = iclass 
