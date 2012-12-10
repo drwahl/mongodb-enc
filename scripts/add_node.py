@@ -76,6 +76,12 @@ def main():
                         paramvalue.append(pkey.split('=')[1])
                         paramkeyvalue[paramkey] = paramvalue
             paramclass[args.puppet_class] = paramkeyvalue
+
+            for puppetclass in paramclass:
+                for param in paramclass[puppetclass]:
+                    if type(paramclass[puppetclass][param]) is type(list()):
+                        if len(paramclass[puppetclass][param]) == 1:
+                            paramclass[puppetclass][param] = paramclass[puppetclass][param][0]
             d = { 'node' : args.puppet_node, 'enc' : { 'classes': paramclass, 'environment' : args.environment }}
         else:
             d = { 'node' : args.puppet_node, 'enc' : { 'environment' : args.environment }}
@@ -116,11 +122,18 @@ def main():
                         paramkeyvalue[paramkey] = paramvalue
             paramclass[args.puppet_class] = paramkeyvalue
 
+            for puppetclass in paramclass:
+                for param in paramclass[puppetclass]:
+                    if type(paramclass[puppetclass][param]) is type(list()):
+                        if len(paramclass[puppetclass][param]) == 1:
+                            paramclass[puppetclass][param] = paramclass[puppetclass][param][0]
+
             if 'classes' in node['enc']:
                 node['enc']['classes'].update(paramclass)
             else:
                 node['enc']['classes'] = paramclass
             paramclass = node['enc']['classes']
+
             col.update({ 'node' : args.puppet_node}, { '$set': { 'enc.classes' : paramclass }})
 
         if args.puppet_param:

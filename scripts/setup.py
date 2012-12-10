@@ -60,6 +60,12 @@ def main():
                 paramkeyvalue[paramkey] = paramvalue
         paramclass[args.puppet_class] = paramkeyvalue
 
+    for puppetclass in paramclass:
+        for param in paramclass[puppetclass]:
+            if type(paramclass[puppetclass][param]) is type(list()):
+                if len(paramclass[puppetclass][param]) == 1:
+                    paramclass[puppetclass][param] = paramclass[puppetclass][param][0]
+
     if args.puppet_action == 'append':
         d = { 'node' : 'default', 'enc' : { 'classes': paramclass }}
         check = col.find_one({ 'node' : 'default' }, {'node': 1})
