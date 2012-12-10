@@ -52,15 +52,21 @@ def main():
     if 'inherit' in n:
         i = True
         while i == True:
+            # grab the info from the inheritance node
             inode = n['inherit']
             if not col.find_one({"node" : inode}):
                 print "ERROR: Inheritance Node "+inode+" Not Found In ENC"
                 sys.exit(1)
             idict = col.find_one({"node": inode})
             if 'classes' in idict['enc']:
+                # grab the classes from the inheritance node
                 iclass = idict['enc']['classes']
+                # apply inheritance node classes to the requested node
                 if 'classes' in n['enc']:
-                    d['enc']['classes'].update(iclass)
+                    #d['enc']['classes'].update(iclass)
+                    tmp_class_store = d['enc']['classes']
+                    d['enc']['classes'] = iclass
+                    d['enc']['classes'].update(tmp_class_store)
                 else:
                     d['enc']['classes'] = iclass 
             n = col.find_one({"node": inode})
