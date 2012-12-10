@@ -46,12 +46,6 @@ def main():
         print "ERROR: Node name and inherit name can not be the same"
         sys.exit(1)
 
-    if args.puppet_class:
-
-        c = {}
-        for pclass in args.puppet_class:
-            c[pclass] = ''
-
     if args.puppet_param:
         args.puppet_param = dict([arg.split('=') for arg in args.puppet_param])
 
@@ -67,7 +61,6 @@ def main():
             node = document['node']
             if node == args.puppet_node:  
                 print args.puppet_node+" Exists In Mongodb. Please Remove Node"
-
 
         if args.puppet_class:
             paramclass = {}
@@ -97,7 +90,7 @@ def main():
 
         col.ensure_index('node', unique=True)
         col.insert(d)
-		
+
     if args.puppet_action == 'append':
 
         node = col.find_one({ 'node' : args.puppet_node})
@@ -106,16 +99,32 @@ def main():
             sys.exit(1)
 
         if args.puppet_class:
-		
-            if 'classes' in node['enc']:
-                node['enc']['classes'].update(c)
+            paramclass = {}
+            if not args.class_params:
+                paramkeyvalue = ''
             else:
-                node['enc']['classes'] = c
-            c = node['enc']['classes']
-            col.update({ 'node' : args.puppet_node}, { '$set': { 'enc.classes' : c }})
+                paramkeyvalue = {}
+                for param in args.class_params:
+                    paramvalue = []
+                    paramkey = ''
+                    for pkey in param.split(','):
+                        paramkey = pkey.split('=')[0]
+                        if "=" in pkey:
+                            paramvalue.append(pkey.split('=')[1])
+                        else:
+                            paramvalue = ''
+                        paramkeyvalue[paramkey] = paramvalue
+            paramclass[args.puppet_class] = paramkeyvalue
+
+            if 'classes' in node['enc']:
+                node['enc']['classes'].update(paramclass)
+            else:
+                node['enc']['classes'] = paramclass
+            paramclass = node['enc']['classes']
+            col.update({ 'node' : args.puppet_node}, { '$set': { 'enc.classes' : paramclass }})
 
         if args.puppet_param:
-			
+
             if 'parameters' in node['enc']:
                 node['enc']['parameters'].update(args.puppet_param)
             else:
@@ -124,8 +133,12 @@ def main():
             col.update({ 'node' : args.puppet_node}, { '$set': {'enc.parameters' : p}})
 
         node['enc']['inherit'] = args.puppet_inherit
-        col.update({ 'node' : args.puppet_node}, { '$set' : {'inherit' : args.puppet_inherit}})
-				
+        if args.puppet_inherit:
+            pinherit = args.puppet_inherit
+        else:
+            pinherit = node['inherit']
+        col.update({ 'node' : args.puppet_node}, { '$set' : {'inherit' : pinherit}})
+
 
 if __name__ == "__main__":
     main()
