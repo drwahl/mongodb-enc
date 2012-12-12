@@ -64,14 +64,14 @@ class Node(object):
         from ConfigParser import SafeConfigParser
 
         parser = SafeConfigParser()
-        if os.path.isfile('/etc/mongodb-enc/conf.ini'):
-            config = '/etc/mongodb-enc/conf.ini'
+        if os.path.isfile('/etc/mongodb_enc/conf.ini'):
+            config = '/etc/mongodb_enc/conf.ini'
         else:
             config = os.path.join(os.path.dirname(__file__), "../conf/conf.ini")
         parser.read(config)
         database = parser.get('mongodb_info', 'mongodb_db_name')
         collection = parser.get('mongodb_info', 'mongodb_collection_name')
-        host = parser.get('mongodb_info', 'mongodb_servers')
+        host = parser.get('mongodb_info', 'mongodb_server')
         con = Connection(host)
         col = con[database][collection]
         return col
