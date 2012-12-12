@@ -65,28 +65,29 @@ def main():
 
     # Check if the node requiers inheritance
     n = col.find_one({"node": node})
-    if n['inherit']:
-        # Grab the info from the inheritance node
-        inode = n['inherit']
-        if not col.find_one({"node" : inode}):
-            print "ERROR: Inheritance node "+inode+" not found in ENC"
-            sys.exit(1)
-        idict = col.find_one({"node": inode})
-        if 'classes' in idict['enc']:
-            # Grab the classes from the inheritance node
-            iclass = idict['enc']['classes']
-            # Apply inheritance node classes to the requested node
-            #if 'classes' in n['enc']:
-            if iclass:
-                # Grab the requested node's classes
-                tmp_class_store = d['enc']['classes']
-                # Apply the inheritance node classes
-                d['enc']['classes'] = iclass
-                # Apply the requested node's classes and overrides
-                d['enc']['classes'].update(tmp_class_store)
-            else:
-                d['enc']['classes'] = n['enc']['classes']
-    else:
+    try:
+        if n['inherit']:
+            # Grab the info from the inheritance node
+            inode = n['inherit']
+            if not col.find_one({"node" : inode}):
+                print "ERROR: Inheritance node "+inode+" not found in ENC"
+                sys.exit(1)
+            idict = col.find_one({"node": inode})
+            if 'classes' in idict['enc']:
+                # Grab the classes from the inheritance node
+                iclass = idict['enc']['classes']
+                # Apply inheritance node classes to the requested node
+                #if 'classes' in n['enc']:
+                if iclass:
+                    # Grab the requested node's classes
+                    tmp_class_store = d['enc']['classes']
+                    # Apply the inheritance node classes
+                    d['enc']['classes'] = iclass
+                    # Apply the requested node's classes and overrides
+                    d['enc']['classes'].update(tmp_class_store)
+                else:
+                    d['enc']['classes'] = n['enc']['classes']
+    except KeyError:
         d = n
 
     print yaml.safe_dump(d['enc'], default_flow_style=False)
