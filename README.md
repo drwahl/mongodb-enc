@@ -1,5 +1,7 @@
 # Puppet ENC Using Mongodb
 
+This originally started as a fork of bcarpio/mongodb-enc, however it has turned in to a complete re-write.  I no longer consider this a fork, but a new project entirely.
+
 ## Documentation
 
 Please refer to the [Wiki](https://github.com/bcarpio/mongodb-enc/wiki). 

@@ -31,20 +31,17 @@ import config
 def main():
     """ This script is called by puppet  """
     if (len(sys.argv) < 2):
-        print "ERROR: Please Supply A Hostname or FQDN"
+        print "ERROR: Please supply a hostname or FQDN"
         sys.exit(1)
 
     col = config.main()
 
-    # Probably want to remove this. This is because I don't use FQDNs in my current puppet manifest. 
-    # also made this easier for me to test.
     node = sys.argv[1]
-    #node = node.split('.')[0]
 
     # Find the node given at a command line argument
     d = col.find_one({"node": node}) 
     if d == None:
-        print "ERROR: Node "+node+" Not Found In ENC" 
+        print "ERROR: Node "+node+" not found in ENC" 
         sys.exit(1)
 
     # Check if the node requiers inheritance
@@ -52,22 +49,22 @@ def main():
     if 'inherit' in n:
         i = True
         while i == True:
-            # grab the info from the inheritance node
+            # Grab the info from the inheritance node
             inode = n['inherit']
             if not col.find_one({"node" : inode}):
-                print "ERROR: Inheritance Node "+inode+" Not Found In ENC"
+                print "ERROR: Inheritance node "+inode+" not found in ENC"
                 sys.exit(1)
             idict = col.find_one({"node": inode})
             if 'classes' in idict['enc']:
-                # grab the classes from the inheritance node
+                # Grab the classes from the inheritance node
                 iclass = idict['enc']['classes']
-                # apply inheritance node classes to the requested node
+                # Apply inheritance node classes to the requested node
                 if 'classes' in n['enc']:
-                    # grab the requested node's classes
+                    # Grab the requested node's classes
                     tmp_class_store = d['enc']['classes']
-                    # apply the inheritance node classes
+                    # Apply the inheritance node classes
                     d['enc']['classes'] = iclass
-                    # apply the requested node's classes and overrides
+                    # Apply the requested node's classes and overrides
                     d['enc']['classes'].update(tmp_class_store)
                 else:
                     d['enc']['classes'] = iclass 
