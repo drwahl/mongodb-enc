@@ -26,7 +26,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 import yaml
 import sys
-import config
+
+def configure():
+    """Read configuration file and intialize connection to the mongodb instance"""
+
+    from pymongo import Connection
+    import os
+    from ConfigParser import SafeConfigParser
+
+    parser = SafeConfigParser()
+    if os.path.isfile('/etc/mongodb_enc/conf.ini'):
+        config = '/etc/mongodb_enc/conf.ini'
+    else:
+        config = os.path.join(os.path.dirname(__file__), "../conf/conf.ini")
+    parser.read(config)
+    database = parser.get('mongodb_info', 'mongodb_db_name')
+    collection = parser.get('mongodb_info', 'mongodb_collection_name')
+    host = parser.get('mongodb_info', 'mongodb_server')
+    con = Connection(host)
+    col = con[database][collection]
+    return col
 
 def main():
     """ This script is called by puppet  """
@@ -34,7 +53,7 @@ def main():
         print "ERROR: Please supply a hostname or FQDN"
         sys.exit(1)
 
-    col = config.main()
+    col = configure()
 
     node = sys.argv[1]
 
@@ -46,31 +65,29 @@ def main():
 
     # Check if the node requiers inheritance
     n = col.find_one({"node": node})
-    if 'inherit' in n:
-        i = True
-        while i == True:
-            # Grab the info from the inheritance node
-            inode = n['inherit']
-            if not col.find_one({"node" : inode}):
-                print "ERROR: Inheritance node "+inode+" not found in ENC"
-                sys.exit(1)
-            idict = col.find_one({"node": inode})
-            if 'classes' in idict['enc']:
-                # Grab the classes from the inheritance node
-                iclass = idict['enc']['classes']
-                # Apply inheritance node classes to the requested node
-                if 'classes' in n['enc']:
-                    # Grab the requested node's classes
-                    tmp_class_store = d['enc']['classes']
-                    # Apply the inheritance node classes
-                    d['enc']['classes'] = iclass
-                    # Apply the requested node's classes and overrides
-                    d['enc']['classes'].update(tmp_class_store)
-                else:
-                    d['enc']['classes'] = iclass 
-            n = col.find_one({"node": inode})
-            if 'inherit' not in n:
-                i = False
+    if n['inherit']:
+        # Grab the info from the inheritance node
+        inode = n['inherit']
+        if not col.find_one({"node" : inode}):
+            print "ERROR: Inheritance node "+inode+" not found in ENC"
+            sys.exit(1)
+        idict = col.find_one({"node": inode})
+        if 'classes' in idict['enc']:
+            # Grab the classes from the inheritance node
+            iclass = idict['enc']['classes']
+            # Apply inheritance node classes to the requested node
+            #if 'classes' in n['enc']:
+            if iclass:
+                # Grab the requested node's classes
+                tmp_class_store = d['enc']['classes']
+                # Apply the inheritance node classes
+                d['enc']['classes'] = iclass
+                # Apply the requested node's classes and overrides
+                d['enc']['classes'].update(tmp_class_store)
+            else:
+                d['enc']['classes'] = n['enc']['classes']
+    else:
+        d = n
 
     print yaml.safe_dump(d['enc'], default_flow_style=False)
 

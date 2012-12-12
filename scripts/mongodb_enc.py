@@ -165,11 +165,10 @@ class Node(object):
         else:
             tmp_inherit = self.puppet_inherit
 
-        if self.verifynode('none'):
-            self.mongo_collection.update({'node': self.node}, {"$set": {'enc': enc, 'inherit': tmp_inherit}}, True)
-        else:
-            self.mongo_collection.update({'node': 'none'}, {"$set": {'enc': '', 'inherit': ''}}, True)
-            self.mongo_collection.update({'node': self.node}, {"$set": {'enc': enc, 'inherit': tmp_inherit}}, True)
+        #if not self.verifynode('none'):
+            #self.mongo_collection.update({'node': 'none'}, {"$set": {'enc': '', 'inherit': ''}}, True)
+
+        self.mongo_collection.update({'node': self.node}, {"$set": {'enc': enc, 'inherit': tmp_inherit}}, True)
 
     def remove(self, rmnode=None):
         """Remove node from mongodb"""
