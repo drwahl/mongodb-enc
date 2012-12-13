@@ -122,6 +122,15 @@ class Node(object):
         else:
             puppet_enc['environment'] = self.environment
 
+        if not puppet_enc['classes']:
+            puppet_enc['classes'] = []
+
+        if not puppet_enc['parameters']:
+            puppet_enc['parameters'] = {}
+
+        if not puppet_enc['environment']:
+            del puppet_enc['environment']
+
         paramclass = {}
         try:
             paramclass = self.mongo_collection.find_one({'node': self.node})['enc']['classes']
