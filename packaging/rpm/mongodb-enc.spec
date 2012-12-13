@@ -3,7 +3,7 @@ Version:        0.1
 Release:        1%{dist}
 Summary:        MongoDB driven External Node Classifier (ENC)
 License:        GPLv3
-URL:            https://github.com/bcarpio/mongodb-enc
+URL:            https://github.com/drwahl/mongodb-enc
 Group:          System Environment/Base
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
