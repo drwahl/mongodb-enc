@@ -19,9 +19,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ***********************************************************************/
 
-:author: Brian Carpio
-:email: bcarpio@thetek.net
-:web: http://www.briancarpio.com
+:author: David Wahlstrom
+:email: david.wahlstrom@gmail.com
 
 """
 import yaml
@@ -47,51 +46,58 @@ def configure():
     col = con[database][collection]
     return col
 
-def main():
-    """ This script is called by puppet  """
+def classify(cnode):
+    """Classify the requested node, including inheritances"""
+
+    col = configure()
+    try:
+        node_classes = col.find_one({'node': cnode})['enc']['classes']
+    except TypeError:
+        node_classes = {}
+
+    try:
+        # Grab the info from the inheritance node
+        inode = col.find_one({'node': cnode})
+        if not inode['inherit']:
+            raise KeyError
+        inode_classes = classify(inode['inherit'])
+        if not col.find_one({"node" : cnode}):
+            print "ERROR: Inheritance node " + cnode + " not found in ENC"
+            sys.exit(1)
+        node_classes = col.find_one({"node": cnode})['enc']['classes']
+        # Grab the requested node's classes
+        tmp_class_store = node_classes
+        # Apply the inheritance node classes
+        node_classes = dict(inode_classes)
+        # Apply the requested node's classes and overrides
+        node_classes.update(tmp_class_store)
+    except KeyError:
+        pass 
+    except TypeError:
+        pass 
+
+    return node_classes
+
+def main(node):
+    """This script is called by puppet"""
+
     if (len(sys.argv) < 2):
         print "ERROR: Please supply a hostname or FQDN"
         sys.exit(1)
 
     col = configure()
 
-    node = sys.argv[1]
-
     # Find the node given at a command line argument
     d = col.find_one({"node": node}) 
     if d == None:
-        print "ERROR: Node "+node+" not found in ENC" 
+        print "ERROR: Node %s not found in ENC"  % node
         sys.exit(1)
 
-    # Check if the node requiers inheritance
-    n = col.find_one({"node": node})
-    try:
-        if n['inherit']:
-            # Grab the info from the inheritance node
-            inode = n['inherit']
-            if not col.find_one({"node" : inode}):
-                print "ERROR: Inheritance node "+inode+" not found in ENC"
-                sys.exit(1)
-            idict = col.find_one({"node": inode})
-            if 'classes' in idict['enc']:
-                # Grab the classes from the inheritance node
-                iclass = idict['enc']['classes']
-                # Apply inheritance node classes to the requested node
-                #if 'classes' in n['enc']:
-                if iclass:
-                    # Grab the requested node's classes
-                    tmp_class_store = d['enc']['classes']
-                    # Apply the inheritance node classes
-                    d['enc']['classes'] = iclass
-                    # Apply the requested node's classes and overrides
-                    d['enc']['classes'].update(tmp_class_store)
-                else:
-                    d['enc']['classes'] = n['enc']['classes']
-    except KeyError:
-        d = n
+    # Classify node
+    d['enc']['classes'] = classify(node)
 
     print yaml.safe_dump(d['enc'], default_flow_style=False)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
