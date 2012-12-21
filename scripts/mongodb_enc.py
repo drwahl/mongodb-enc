@@ -174,8 +174,8 @@ class Node(object):
         else:
             tmp_inherit = self.puppet_inherit
 
-        #if not self.verifynode('none'):
-            #self.mongo_collection.update({'node': 'none'}, {"$set": {'enc': '', 'inherit': ''}}, True)
+        if not self.verifynode('none'):
+            self.mongo_collection.update({'node': 'none'}, {"$set": {'enc': {'classes': []}, 'inherit': ''}}, True)
 
         self.mongo_collection.update({'node': self.node}, {"$set": {'enc': enc, 'inherit': tmp_inherit}}, True)
 
